@@ -2,33 +2,53 @@ pipeline {
     agent any
 
     tools {
-        jdk 'JDK17'
         maven 'Maven3'
+        jdk 'JDK17'
     }
 
     stages {
         stage('Checkout') {
             steps {
-                checkout scm
+                echo '📦 Cloning the repository...'
+                git branch: 'main', url: 'https://github.com/priyanshi2961/PetClinic-CICD.git'
             }
         }
 
         stage('Build') {
             steps {
-                sh 'mvn clean package'
+                echo '🏗️ Building the project...'
+                bat 'mvn clean compile'
             }
         }
 
         stage('Test') {
             steps {
-                sh 'mvn test'
+                echo '🧪 Running tests...'
+                bat 'mvn test'
+            }
+        }
+
+        stage('Package') {
+            steps {
+                echo '📦 Packaging application...'
+                bat 'mvn package'
             }
         }
 
         stage('Archive Artifacts') {
             steps {
-                archiveArtifacts artifacts: 'target/*.jar', fingerprint: true
+                echo '📁 Archiving build artifacts...'
+                archiveArtifacts artifacts: '**/target/*.jar', fingerprint: true
             }
+        }
+    }
+
+    post {
+        success {
+            echo '✅ Build Successful!'
+        }
+        failure {
+            echo '❌ Build Failed!'
         }
     }
 }
